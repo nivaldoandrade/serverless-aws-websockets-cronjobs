@@ -1,18 +1,25 @@
 import type { APIGatewayProxyWebsocketEventV2 } from 'aws-lambda';
+import { removeItem } from '../utils/removeItem';
 
 type RouteKey = '$connect' | '$disconnect';
 
+const connectionIds: Array<string> = [];
+
 export async function handler(event: APIGatewayProxyWebsocketEventV2) {
+  const connectionId = event.requestContext.connectionId;
   const routeKey = event.requestContext.routeKey as RouteKey;
 
   if (routeKey === '$connect') {
-    console.log('O usuário conectou!');
+    console.log(`O ${connectionId} conectou`);
+    connectionIds.push(connectionId);
   }
 
   if (routeKey === '$disconnect') {
-    console.log('O usuário desconectou!');
+    removeItem(connectionIds, connectionId);
+    console.log(`O ${connectionId} desconectou`);
   }
 
-  // EM FUNÇÃO DO TIPO WEBSOCKET SEMPRE TEMOS QUE RETORNAR UM STATUSCODE SUCESSO SENÃO O TUNEL NÃO É CRIADO
+  console.log('connnectionIds: ', connectionIds);
+
   return { statusCode: 200 };
 }
