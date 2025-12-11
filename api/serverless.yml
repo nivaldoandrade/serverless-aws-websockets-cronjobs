@@ -26,9 +26,14 @@ build:
       - '@aws-sdk/*'
 
 functions:
-  hello:
-    handler: src/functions/hello.handler
+  connectionWS:
+    handler: src/functions/connectionWS.handler
     events:
-      - httpApi:
-          path: /
-          method: get
+      - websocket:
+          route: $connect
+      - websocket:
+          route: $disconnect
+
+    # PODEMOS SETAR A ROUTE KEY DIRETAMENTE NA WEBSOCKET
+    # events:
+    #   - websocket: $connect
