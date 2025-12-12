@@ -10,8 +10,17 @@ provider:
   architecture: arm64
   region: sa-east-1
   environment:
+    TABLE_NAME: !Ref ConnectionsTable
     URL_CONNECTIONS_WEBSOCKET_API: !Sub https://${WebsocketsApi}.execute-api.${self:provider.region}.amazonaws.com/${sls:stage}/
-
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:DeleteItem
+            - dynamodb:Scan
+          Resource: !GetAtt ConnectionsTable.Arn
 
 package:
   individually: true
@@ -27,6 +36,23 @@ build:
     external:
       - '@aws-sdk/*'
 
+
+resources:
+  Resources:
+    ConnectionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${sls:stage}-ConnectionsTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: connectionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connectionId
+            KeyType: HASH
+
+
+
 functions:
   connectionWS:
     handler: src/functions/connectionWS.handler
@@ -35,8 +61,6 @@ functions:
           route: $connect
       - websocket:
           route: $disconnect
-      - websocket:
-          route: sendMessage
 
     # PODEMOS SETAR A ROUTE KEY DIRETAMENTE NA WEBSOCKET
     # events:
