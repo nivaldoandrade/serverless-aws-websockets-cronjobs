@@ -38,18 +38,28 @@ const messageBodyVariants = cva('max-w-9/12 p-4 rounded-2xl mt-1 border', {
 
 interface IMessageParams {
 	type: 'incoming' | 'outgoing'
+	data: {
+		username: string;
+		message: string;
+		formattedTime: string;
+	}
+
 }
 
-export function Message({ type }: IMessageParams) {
+export function Message({ type, data }: IMessageParams) {
 
 	return (
 		<div className={messageWrapperVariants({ type })}>
 			<div className={messageHeaderVariants({ type })}>
-				<span className="text-sm text-muted-foreground">Você</span>
-				<span className="text-xs text-muted-foreground/70">10:24 AM</span>
+				<span className="text-sm text-muted-foreground">
+					{data.username}
+				</span>
+				<span className="text-xs text-muted-foreground/70">
+					{data.formattedTime}
+				</span>
 			</div>
 			<div className={messageBodyVariants({ type })}>
-				Olá, tudo bem?
+				{data.message}
 			</div>
 		</div>
 	);
