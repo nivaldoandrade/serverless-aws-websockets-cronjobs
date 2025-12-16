@@ -8,7 +8,7 @@ import { bodyParser } from '../utils/bodyParser';
 export async function handler(
   event: APIGatewayProxyWebsocketEventV2,
 ) {
-
+  const { connectionId, messageId, requestTimeEpoch } = event.requestContext;
   const body = bodyParser(event.body);
 
   const paginate = paginateScan(
@@ -20,7 +20,12 @@ export async function handler(
     await Promise.allSettled(items.map(item => {
       const command = new PostToConnectionCommand({
         ConnectionId: item.connectionId,
-        Data: JSON.stringify(`${item.connectionId}: ${body.message}`),
+        Data: JSON.stringify({
+          connectionId,
+          message: body.message,
+          messageId,
+          requestTimeEpoch,
+        }),
       });
 
       return apigwmClient.send(command);

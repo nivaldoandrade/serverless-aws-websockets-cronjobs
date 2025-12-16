@@ -61,6 +61,8 @@ functions:
           route: $connect
       - websocket:
           route: $disconnect
+      - websocket:
+          route: connected
   sendMessageWS:
     handler: src/functions/sendMessageWS.handler
     events:
