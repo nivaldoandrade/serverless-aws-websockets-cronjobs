@@ -24,7 +24,7 @@ const messageHeaderVariants = cva('flex items-baseline gap-1.5', {
 	},
 });
 
-const messageBodyVariants = cva('max-w-9/12 p-4 rounded-2xl mt-1 border', {
+const messageBodyVariants = cva('max-w-9/12 p-4 rounded-2xl mt-1 border whitespace-pre-wrap', {
 	variants: {
 		type: {
 			incoming: 'bg-card text-card-foreground rounded-tl-none',

@@ -18,14 +18,18 @@ function App() {
 	const [user, setUser] = useState('');
 
 	const messagesContainerRef = useRef<HTMLDivElement>(null);
+	const webSocket = useRef<WebSocket>(null);
 
 	function sendMessage() {
 		if (message.trim() !== '') {
-			console.log('Enviando a message: ', message);
+			const data = {
+				action: 'sendMessage',
+				message,
+			};
+
+			webSocket.current?.send(JSON.stringify(data));
 			setMessage('');
 		}
-
-		console.log('Digite sua mensagem');
 	}
 
 	function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -47,6 +51,7 @@ function App() {
 
 	useEffect(() => {
 		const ws = new WebSocket(import.meta.env.VITE_URL_SOCKET);
+		webSocket.current = ws;
 
 		function handleOpen() {
 			ws.send(JSON.stringify({ action: 'connected' }));
@@ -75,6 +80,7 @@ function App() {
 		return () => {
 			ws.removeEventListener('message', handleMessage);
 			ws.removeEventListener('open', handleOpen);
+			webSocket.current = null;
 			ws.close();
 		};
 	}, []);
