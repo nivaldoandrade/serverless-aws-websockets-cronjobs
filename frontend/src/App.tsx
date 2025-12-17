@@ -13,10 +13,37 @@ interface IMessage {
 }
 
 function App() {
+	const [message, setMessage] = useState('');
 	const [messages, setMessages] = useState<Array<IMessage>>([]);
 	const [user, setUser] = useState('');
 
 	const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+	function sendMessage() {
+		if (message.trim() !== '') {
+			console.log('Enviando a message: ', message);
+			setMessage('');
+		}
+
+		console.log('Digite sua mensagem');
+	}
+
+	function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+
+		sendMessage();
+	}
+
+	function handleKeyDown(
+		event: React.KeyboardEvent<HTMLTextAreaElement>,
+	) {
+
+		if (event.key === 'Enter' && !event.shiftKey) {
+			event.preventDefault();
+
+			sendMessage();
+		}
+	}
 
 	useEffect(() => {
 		const ws = new WebSocket(import.meta.env.VITE_URL_SOCKET);
@@ -81,20 +108,29 @@ function App() {
 					))}
 				</div>
 
-				<div className="w-full bg-transparent p-4">
+				<form
+					className="w-full bg-transparent p-4"
+					onSubmit={handleSubmit}
+				>
 					<div className="relative flex items-center gap-2 py-2 px-4 rounded-xl bg-card border focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all duration-200">
 						<textarea
 							name="message"
+							value={message}
 							placeholder='Digite sua mensagem...'
 							rows={1}
-							className="w-full resize-none max-h-96 min-h-11 py-2.5 focus:outline-0"
 							style={{ scrollbarWidth: 'none' }}
+							onKeyDown={handleKeyDown}
+							onChange={(e) => setMessage(e.target.value)}
+							className="w-full resize-none max-h-24 min-h-11 py-2.5 focus:outline-0 field-sizing-content"
 						/>
-						<Button className="h-10">
+						<Button className="h-10" type='submit'>
 							<SendHorizonalIcon size={16} />
 						</Button>
 					</div>
-				</div>
+					<span className="block text-center text-xs text-muted-foreground mt-2">
+						Pressione "Enter" para enviar e "Shift + Enter" para uma nova linha
+					</span>
+				</form>
 			</main>
 		</div>
 	);
