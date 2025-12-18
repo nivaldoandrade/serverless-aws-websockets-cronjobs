@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Header } from './components/Header';
 import { Message } from './components/Message';
 import { Button } from './components/ui/button';
+import { useWebSockets, type WebSocketEvent } from './hooks/useWebSockets';
 import { formatToHHMM } from './lib/utils';
 
 interface IMessage {
@@ -18,7 +19,24 @@ function App() {
 	const [user, setUser] = useState('');
 
 	const messagesContainerRef = useRef<HTMLDivElement>(null);
-	const webSocket = useRef<WebSocket>(null);
+
+	const { sendAction, status } = useWebSockets({
+		onMessage: handleSocketMessage,
+	});
+
+	function handleSocketMessage(data: WebSocketEvent) {
+		if (data.type === 'connected') {
+			setUser(data.connectionId);
+			return;
+		}
+
+		setMessages(prevState => prevState.concat({
+			messageId: data.messageId,
+			message: data.message,
+			username: data.connectionId,
+			formattedTime: formatToHHMM(data.requestTimeEpoch),
+		}));
+	}
 
 	function sendMessage() {
 		if (message.trim() !== '') {
@@ -27,7 +45,7 @@ function App() {
 				message,
 			};
 
-			webSocket.current?.send(JSON.stringify(data));
+			sendAction(data);
 			setMessage('');
 		}
 	}
@@ -48,42 +66,6 @@ function App() {
 			sendMessage();
 		}
 	}
-
-	useEffect(() => {
-		const ws = new WebSocket(import.meta.env.VITE_URL_SOCKET);
-		webSocket.current = ws;
-
-		function handleOpen() {
-			ws.send(JSON.stringify({ action: 'connected' }));
-		}
-
-		function handleMessage(event: MessageEvent<string>) {
-			const data = JSON.parse(event.data);
-
-			if (data.type === 'connected') {
-				setUser(data.connectionId);
-				return;
-			}
-
-			setMessages(prevState => prevState.concat({
-				messageId: data.messageId,
-				message: data.message,
-				username: data.connectionId,
-				formattedTime: formatToHHMM(data.requestTimeEpoch),
-			}));
-
-		}
-
-		ws.addEventListener('open', handleOpen);
-		ws.addEventListener('message', handleMessage);
-
-		return () => {
-			ws.removeEventListener('message', handleMessage);
-			ws.removeEventListener('open', handleOpen);
-			webSocket.current = null;
-			ws.close();
-		};
-	}, []);
 
 	useEffect(() => {
 		if (!messagesContainerRef.current) {
@@ -129,7 +111,11 @@ function App() {
 							onChange={(e) => setMessage(e.target.value)}
 							className="w-full resize-none max-h-24 min-h-11 py-2.5 focus:outline-0 field-sizing-content"
 						/>
-						<Button className="h-10" type='submit'>
+						<Button
+							type='submit'
+							className="h-10"
+							disabled={status !== 'open' || !message.trim()}
+						>
 							<SendHorizonalIcon size={16} />
 						</Button>
 					</div>
