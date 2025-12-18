@@ -67,6 +67,12 @@ functions:
     handler: src/functions/sendMessageWS.handler
     events:
       - websocket: sendMessage
+  gargabeColletionWS:
+    handler: src/functions/gargabeColletionWS.handler
+    events:
+      - eventBridge:
+          schedule: rate(10 minutes)
+
 
     # PODEMOS SETAR A ROUTE KEY DIRETAMENTE NA WEBSOCKET
     # events:
