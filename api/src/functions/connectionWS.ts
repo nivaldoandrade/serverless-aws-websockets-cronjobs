@@ -1,7 +1,5 @@
 
-import { PostToConnectionCommand } from '@aws-sdk/client-apigatewaymanagementapi';
 import type { APIGatewayProxyWebsocketEventV2 } from 'aws-lambda';
-import { apigwmClient } from '../clients/apigwmClient';
 import { connect } from '../services/connect';
 import { disconnect } from '../services/disconnect';
 
@@ -17,18 +15,6 @@ export async function handler(event: APIGatewayProxyWebsocketEventV2) {
 
   if (routeKey === '$disconnect') {
     await disconnect(connectionId);
-  }
-
-  if (routeKey === 'connected') {
-    const command = new PostToConnectionCommand({
-      ConnectionId: connectionId,
-      Data: JSON.stringify({
-        type: routeKey,
-        connectionId,
-      }),
-    });
-
-    await apigwmClient.send(command);
   }
 
   return { statusCode: 200 };
