@@ -1,6 +1,7 @@
 import type { StatusWebSocket } from '@/hooks/useWebSockets';
 import { cn } from '@/lib/utils';
 import { MessagesSquare } from 'lucide-react';
+import { ModeToggle } from './ModeToggle';
 
 const statusVariants = {
 	connecting: {
@@ -45,20 +46,23 @@ export function Header({ status }: IHeaderParams) {
 					</h3>
 				</div>
 
-				<div className='flex items-center gap-2'>
-					<span className="relative flex h-3 w-3">
+				<div className='flex items-center gap-3'>
+					<div className='flex items-center gap-2'>
+						<span className="relative flex h-3 w-3">
+							<span className={cn(
+								'animate-ping absolute h-full w-full rounded-full  opacity-75', statusVariant.ping,
+							)}></span>
+							<span className={cn(
+								'relative rounded-full h-3 w-3', statusVariant.dot,
+							)}></span>
+						</span>
 						<span className={cn(
-							'animate-ping absolute h-full w-full rounded-full  opacity-75', statusVariant.ping,
-						)}></span>
-						<span className={cn(
-							'relative rounded-full h-3 w-3', statusVariant.dot,
-						)}></span>
-					</span>
-					<span className={cn(
-						'text-xs font-medium', statusVariant.text,
-					)} >
-						{statusVariant.label}
-					</span>
+							'text-xs font-medium', statusVariant.text,
+						)} >
+							{statusVariant.label}
+						</span>
+					</div>
+					<ModeToggle />
 				</div>
 			</div>
 		</header>
