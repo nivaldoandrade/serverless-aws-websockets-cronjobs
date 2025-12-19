@@ -1,6 +1,34 @@
+import type { StatusWebSocket } from '@/hooks/useWebSockets';
+import { cn } from '@/lib/utils';
 import { MessagesSquare } from 'lucide-react';
 
-export function Header() {
+const statusVariants = {
+	connecting: {
+		label: 'Conectando...',
+		dot: 'bg-orange-500',
+		ping: 'bg-orange-400',
+		text: 'text-orange-500',
+	},
+	open: {
+		label: 'Online',
+		dot: 'bg-emerald-500',
+		ping: 'bg-emerald-400',
+		text: 'text-emerald-500',
+	},
+	closed: {
+		label: 'Offline',
+		dot: 'bg-red-500',
+		ping: 'bg-red-400',
+		text: 'text-red-500',
+	},
+} as const;
+
+interface IHeaderParams {
+	status: StatusWebSocket
+}
+
+export function Header({ status }: IHeaderParams) {
+	const statusVariant = statusVariants[status];
 
 	return (
 		<header className="w-full border-b z-10 bg-card">
@@ -19,14 +47,19 @@ export function Header() {
 
 				<div className='flex items-center gap-2'>
 					<span className="relative flex h-3 w-3">
-						<span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-						<span className="relative rounded-full h-3 w-3 bg-emerald-500"></span>
+						<span className={cn(
+							'animate-ping absolute h-full w-full rounded-full  opacity-75', statusVariant.ping,
+						)}></span>
+						<span className={cn(
+							'relative rounded-full h-3 w-3', statusVariant.dot,
+						)}></span>
 					</span>
-					<span className='text-xs font-medium text-emerald-500' >
-						Online
+					<span className={cn(
+						'text-xs font-medium', statusVariant.text,
+					)} >
+						{statusVariant.label}
 					</span>
 				</div>
-
 			</div>
 		</header>
 	);

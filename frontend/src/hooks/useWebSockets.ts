@@ -13,8 +13,10 @@ interface IUseWebSockets {
 	onMessage: (data: WebSocketEvent) => void
 }
 
+export type StatusWebSocket = 'connecting' | 'open' | 'closed';
+
 export function useWebSockets({ onMessage }: IUseWebSockets) {
-	const [status, setStatus] = useState<'connecting' | 'open' | 'closed'>('connecting');
+	const [status, setStatus] = useState<StatusWebSocket>('connecting');
 	const webSocket = useRef<WebSocket>(null);
 	const memorizedOnMessage = useRef(onMessage);
 
@@ -41,14 +43,21 @@ export function useWebSockets({ onMessage }: IUseWebSockets) {
 			memorizedOnMessage.current(data);
 		}
 
+		function handleClose(event: CloseEvent) {
+			console.log('WebSocket Closed: ', event);
+			setStatus('closed');
+		}
+
 		ws.addEventListener('open', handleOpen);
 		ws.addEventListener('error', handleError);
 		ws.addEventListener('message', handleMessage);
+		ws.addEventListener('close', handleClose);
 
 		return () => {
 			ws.removeEventListener('open', handleOpen);
 			ws.removeEventListener('error', handleError);
 			ws.removeEventListener('message', handleMessage);
+			ws.removeEventListener('close', handleClose);
 			webSocket.current = null;
 			ws.close();
 		};
